@@ -5,13 +5,13 @@
 
 module Set3a where
 
-import Mooc.Todo
+import           Mooc.Todo
 
 -- Some imports you'll need.
 -- Do not add any other imports! :)
-import Data.Char
-import Data.Either
-import Data.List
+import           Data.Char
+import           Data.Either
+import           Data.List
 
 ------------------------------------------------------------------------------
 -- Ex 1: implement the function maxBy that takes as argument a
@@ -28,7 +28,9 @@ import Data.List
 --  maxBy head   [1,2,3] [4,5]  ==>  [4,5]
 
 maxBy :: (a -> Int) -> a -> a -> a
-maxBy measure a b = todo
+maxBy measure a b
+    | measure a > measure b = a
+    | otherwise             = b
 
 ------------------------------------------------------------------------------
 -- Ex 2: implement the function mapMaybe that takes a function and a
@@ -40,7 +42,8 @@ maxBy measure a b = todo
 --   mapMaybe length (Just "abc") ==> Just 3
 
 mapMaybe :: (a -> b) -> Maybe a -> Maybe b
-mapMaybe f x = todo
+mapMaybe _ Nothing  = Nothing
+mapMaybe f (Just x) = Just (f x)
 
 ------------------------------------------------------------------------------
 -- Ex 3: implement the function mapMaybe2 that works like mapMaybe
@@ -54,7 +57,8 @@ mapMaybe f x = todo
 --   mapMaybe2 div (Just 6) Nothing   ==>  Nothing
 
 mapMaybe2 :: (a -> b -> c) -> Maybe a -> Maybe b -> Maybe c
-mapMaybe2 f x y = todo
+mapMaybe2 f (Just x) (Just y) = Just (f x y)
+mapMaybe2 _ _        _        = Nothing
 
 ------------------------------------------------------------------------------
 -- Ex 4: define the functions firstHalf and palindrome so that
@@ -76,9 +80,11 @@ mapMaybe2 f x y = todo
 palindromeHalfs :: [String] -> [String]
 palindromeHalfs xs = map firstHalf (filter palindrome xs)
 
-firstHalf = todo
+firstHalf :: String -> String
+firstHalf s = take ((length s + 1) `div` 2) s
 
-palindrome = todo
+palindrome :: String -> Bool
+palindrome s = reverse s == s
 
 ------------------------------------------------------------------------------
 -- Ex 5: Implement a function capitalize that takes in a string and
@@ -96,7 +102,11 @@ palindrome = todo
 --   capitalize "goodbye cruel world" ==> "Goodbye Cruel World"
 
 capitalize :: String -> String
-capitalize = todo
+capitalize = unwords . map capitalizeFirst . words
+
+capitalizeFirst :: String -> String
+capitalizeFirst []     = []
+capitalizeFirst (s:xs) = toUpper s:xs
 
 ------------------------------------------------------------------------------
 -- Ex 6: powers k max should return all the powers of k that are less
@@ -113,7 +123,7 @@ capitalize = todo
 --   * the function takeWhile
 
 powers :: Int -> Int -> [Int]
-powers k max = todo
+powers k max = takeWhile (<=max ) $  map (k^) [0..max]
 
 ------------------------------------------------------------------------------
 -- Ex 7: implement a functional while loop. While should be a function
@@ -136,7 +146,10 @@ powers k max = todo
 --     ==> Avvt
 
 while :: (a->Bool) -> (a->a) -> a -> a
-while check update value = todo
+while check update value
+     | check value = while check update $ update value
+     | otherwise = value
+
 
 ------------------------------------------------------------------------------
 -- Ex 8: another version of a while loop. This time, the check
@@ -153,7 +166,12 @@ while check update value = todo
 --   whileRight (step 1000) 3  ==> 1536
 
 whileRight :: (a -> Either b a) -> a -> b
-whileRight f x = todo
+whileRight f x =
+    case f x of
+        Right x -> whileRight f x
+        Left x  -> x
+
+
 
 -- for the whileRight examples:
 -- step k x doubles x if it's less than k
@@ -172,7 +190,7 @@ step k x = if x<k then Right (2*x) else Left x
 -- Hint! This is a great use for list comprehensions
 
 joinToLength :: Int -> [String] -> [String]
-joinToLength = todo
+joinToLength k s = [a++b | a<-s, b<-s, length (a++b) == k]
 
 ------------------------------------------------------------------------------
 -- Ex 10: implement the operator +|+ that returns a list with the first
@@ -185,6 +203,13 @@ joinToLength = todo
 --   [1,2,3] +|+ [4,5,6]  ==> [1,4]
 --   [] +|+ [True]        ==> [True]
 --   [] +|+ []            ==> []
+
+
+(+|+) :: [a] -> [a] -> [a]
+[] +|+ []       = []
+[] +|+ (x:_)    = [x]
+(x:_) +|+ []    = [x]
+(x:_) +|+ (y:_) = [x, y]
 
 
 ------------------------------------------------------------------------------
@@ -202,8 +227,8 @@ joinToLength = todo
 --   sumRights [Left "bad!", Left "missing"]         ==>  0
 
 sumRights :: [Either a Int] -> Int
-sumRights = todo
-
+-- sumRights list = sum $ map (either (const 0) id) list
+sumRights = sum . rights
 ------------------------------------------------------------------------------
 -- Ex 12: recall the binary function composition operation
 -- (f . g) x = f (g x). In this exercise, your task is to define a function
@@ -218,7 +243,9 @@ sumRights = todo
 --   multiCompose [(3*), (2^), (+1)] 0 ==> 6
 --   multiCompose [(+1), (2^), (3*)] 0 ==> 2
 
-multiCompose fs = todo
+multiCompose :: [a -> a] -> a -> a
+multiCompose [] x     = x
+multiCompose (f:fs) x =  (f . multiCompose fs)  x
 
 ------------------------------------------------------------------------------
 -- Ex 13: let's consider another way to compose multiple functions. Given
@@ -237,8 +264,8 @@ multiCompose fs = todo
 --   multiApp reverse [tail, take 2, reverse] "foo" ==> ["oof","fo","oo"]
 --   multiApp concat [take 3, reverse] "race" ==> "racecar"
 
-multiApp = todo
-
+multiApp :: ([b] -> t) -> [a -> b] -> a -> t
+multiApp f lf x = f $ map ($ x) lf
 ------------------------------------------------------------------------------
 -- Ex 14: in this exercise you get to implement an interpreter for a
 -- simple language. You should keep track of the x and y coordinates,
@@ -272,4 +299,13 @@ multiApp = todo
 -- function, the surprise won't work.
 
 interpreter :: [String] -> [String]
-interpreter commands = todo
+interpreter commands = go 0 0 commands
+    where go x y ("up":commands)     = go x (y+1) commands
+          go x y ("down":commands)   = go x (y-1) commands
+          go x y ("left":commands)   = go (x-1) y commands
+          go x y ("right":commands)  = go (x+1) y commands
+          go x y ("printX":commands) = show x : go x y commands
+          go x y ("printY":commands) = show y : go x y commands
+          go x y []                  = []
+          go x y (_:commands)        = "BAD" : go x y commands
+
