@@ -94,10 +94,10 @@ largest :: [Int] -> [Int]
 largest = foldr largestHelper []
 
 largestHelper :: Ord a => a -> [a] -> [a]
-largestHelper x [] = [x]
-largestHelper x (y:ys)
-  | x > y = [x]
-  | x == y = x:y:ys
+largestHelper next [] = [next]
+largestHelper next (y:ys)
+  | next > y = [next]
+  | next == y = next:y:ys
   | otherwise = y:ys
 
 
