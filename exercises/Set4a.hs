@@ -211,7 +211,7 @@ transfer from to amount bank
   | Map.notMember from bank = bank
   | Map.notMember to bank = bank
   | amount < 0 = bank
-  | amount > Map.findWithDefault 1000000000 from bank = bank
+  | Just amount > Map.lookup from bank = bank
   | otherwise = Map.adjust (+amount) to $ Map.adjust (+(-amount)) from bank
 
 ------------------------------------------------------------------------------
