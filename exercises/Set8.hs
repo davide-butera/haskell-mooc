@@ -1,8 +1,8 @@
 module Set8 where
 
-import Data.Char (intToDigit)
+import           Data.Char     (intToDigit)
 
-import Mooc.Todo
+import           Mooc.Todo
 
 -- This is the final project for Introduction to Functional
 -- Programming, part 1. We'll be developing a sort of functional image
@@ -12,7 +12,7 @@ import Mooc.Todo
 
 -- We'll use the JuicyPixels library to generate images. The library
 -- exposes the Codec.Picture module that has everything we need.
-import Codec.Picture
+import           Codec.Picture
 
 -- Let's start by defining Colors and Pictures.
 
@@ -55,7 +55,7 @@ data Coord = Coord Int Int
 -- A Picture is a wrapper for a function of type Coord -> Color.
 -- The function takes in x and y coordinates and returns a color.
 
-data Picture = Picture (Coord -> Color)
+newtype Picture = Picture (Coord -> Color)
 
 -- Here's a picture that's just a white dot at 10,10
 justADot = Picture f
@@ -133,7 +133,10 @@ renderListExample = renderList justADot (9,11) (9,11)
 --      ["000000","000000","000000"]]
 
 dotAndLine :: Picture
-dotAndLine = todo
+dotAndLine = Picture f
+  where f (Coord x y) | (x,y)==(3,4) = white
+                      | y==8         = pink
+                      | otherwise    = black
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -166,10 +169,11 @@ dotAndLine = todo
 --          ["7f0000","7f0000","7f0000"]]
 
 blendColor :: Color -> Color -> Color
-blendColor = todo
+blendColor (Color r1 g1 b1) (Color r2 g2 b2) = Color ((r1+r2)`div`2) ((g1+g2)`div`2) ((b1+b2)`div`2)
 
 combine :: (Color -> Color -> Color) -> Picture -> Picture -> Picture
-combine = todo
+combine op (Picture p1) (Picture p2) = Picture p
+  where p (Coord x y) = op (p1 (Coord x y)) (p2 (Coord x y))
 
 ------------------------------------------------------------------------------
 
@@ -182,7 +186,7 @@ blend = combine blendColor
 -- coordinates and returns a boolean indicating whether the
 -- coordinates belong to the shape.
 
-data Shape = Shape (Coord -> Bool)
+newtype Shape = Shape (Coord -> Bool)
 
 -- Here's a utility for testing
 contains :: Shape -> Int -> Int -> Bool
@@ -213,7 +217,7 @@ fill c (Shape f) = Picture g
 --   render exampleCircle 400 300 "circle.png"
 
 exampleCircle :: Picture
-exampleCircle = fill red (circle 80 100 200)
+exampleCircle = fill red (circle 80 100 100)
 
 ------------------------------------------------------------------------------
 -- Ex 3: implement a rectangle. The value of `rectangle x0 y0 w h`
@@ -230,7 +234,9 @@ exampleCircle = fill red (circle 80 100 200)
 --        ["000000","000000","000000","000000","000000","000000"]]
 
 rectangle :: Int -> Int -> Int -> Int -> Shape
-rectangle x0 y0 w h = todo
+rectangle x0 y0 w h = Shape f
+  where f (Coord x y) = x0<=x && x < x0+w &&
+                        y0<=y && y < y0+h
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------

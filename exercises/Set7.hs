@@ -312,4 +312,4 @@ evaluate (Operation s a b) = case s of
 
 render :: Arithmetic -> String
 render (Number n)        = show n
-render (Operation s a b) = "("++ render a ++ s　++ render b ++ ")"
+render (Operation s a b) = "(" ++ render a ++ s　++ render b ++ ")"
