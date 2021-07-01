@@ -252,10 +252,13 @@ rectangle x0 y0 w h = Shape f
 -- shape.
 
 union :: Shape -> Shape -> Shape
-union = todo
+union (Shape a) (Shape b) = Shape c
+  where c coord = a coord || b coord
 
+-- binary function that is true just for (True,False) is "a and (not b)"
 cut :: Shape -> Shape -> Shape
-cut = todo
+cut (Shape a) (Shape b) = Shape c
+  where c coord = a coord && not (b coord)
 ------------------------------------------------------------------------------
 
 -- Here's a snowman, built using union from circles and rectangles.
@@ -283,7 +286,9 @@ exampleSnowman = fill white snowman
 --        ["000000","000000","000000"]]
 
 paintSolid :: Color -> Shape -> Picture -> Picture
-paintSolid color shape base = todo
+paintSolid color (Shape s) (Picture base) = Picture p
+  where p coord | s coord = color
+                | otherwise = base coord
 ------------------------------------------------------------------------------
 
 allWhite :: Picture
@@ -328,7 +333,9 @@ stripes a b = Picture f
 --       ["000000","000000","000000","000000","000000"]]
 
 paint :: Picture -> Shape -> Picture -> Picture
-paint pat shape base = todo
+paint (Picture pat) (Shape s) (Picture base) = Picture p
+  where p coord | s coord = pat coord
+                | otherwise = base coord
 ------------------------------------------------------------------------------
 
 -- Here's a patterned version of the snowman example. See it by running:
@@ -388,22 +395,29 @@ xy = Picture f
 -- The FlipXY transform should switch the x and y coordinates, i.e.
 -- map (10,15) to (15,10).
 
-data Fill = Fill Color
+newtype Fill = Fill Color
 
 instance Transform Fill where
-  apply = todo
+  apply (Fill color) (Picture _) = Picture res
+    where res _ = color
 
-data Zoom = Zoom Int
+newtype Zoom = Zoom Int
   deriving Show
 
 instance Transform Zoom where
-  apply = todo
+  apply (Zoom z) (Picture base) = Picture res
+    where res (Coord x y) = base (Coord (div x z) (div y z))
 
 data Flip = FlipX | FlipY | FlipXY
   deriving Show
 
 instance Transform Flip where
-  apply = todo
+  apply FlipX (Picture base) = Picture res
+    where res (Coord x y) = base (Coord (-x) y)
+  apply FlipY (Picture base) = Picture res
+    where res (Coord x y) = base (Coord x (-y))
+  apply FlipXY (Picture base) = Picture res
+    where res (Coord x y) = base (Coord y x)
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
