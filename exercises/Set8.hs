@@ -432,8 +432,8 @@ instance Transform Flip where
 data Chain a b = Chain a b
   deriving Show
 
-instance Transform (Chain a b) where
-  apply = todo
+instance (Transform a, Transform b) => Transform (Chain a b) where
+  apply (Chain a b) = apply a . apply b
 ------------------------------------------------------------------------------
 
 -- Now we can redefine largeVerticalStripes using the above Transforms.
@@ -470,8 +470,23 @@ checkered = flipBlend largeVerticalStripes2
 data Blur = Blur
   deriving Show
 
+
 instance Transform Blur where
-  apply = todo
+  apply Blur (Picture base) = Picture res
+    where res (Coord x y) = avg' [base (Coord x (y+1)),
+                                  base (Coord (x-1) y),
+                                  base (Coord x y),
+                                  base (Coord (x+1) y),
+                                  base (Coord x (y-1))]
+
+avg :: [Int] -> Int
+avg xs = sum xs `div` length xs
+
+avg' :: [Color] -> Color
+avg' colors = Color (avg [r | (Color r g b) <- colors ])
+                    (avg [g | (Color r g b) <- colors ])
+                    (avg [b | (Color r g b) <- colors ])
+
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -485,11 +500,12 @@ instance Transform Blur where
 --        ["000000","141414","141414","141414","000000"],
 --        ["000000","000000","0a0a0a","000000","000000"]]
 
-data BlurMany = BlurMany Int
+newtype BlurMany = BlurMany Int
   deriving Show
 
 instance Transform BlurMany where
-  apply = todo
+  apply (BlurMany 0) base = base
+  apply (BlurMany n) base = (apply Blur . apply (BlurMany (n-1))) base
 ------------------------------------------------------------------------------
 
 -- Here's a blurred version of our original snowman. See it by running
