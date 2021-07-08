@@ -470,7 +470,6 @@ checkered = flipBlend largeVerticalStripes2
 data Blur = Blur
   deriving Show
 
-
 instance Transform Blur where
   apply Blur (Picture base) = Picture res
     where res (Coord x y) = avg' [base (Coord x (y+1)),
@@ -483,9 +482,9 @@ avg :: [Int] -> Int
 avg xs = sum xs `div` length xs
 
 avg' :: [Color] -> Color
-avg' colors = Color (avg [r | (Color r g b) <- colors ])
-                    (avg [g | (Color r g b) <- colors ])
-                    (avg [b | (Color r g b) <- colors ])
+avg' colors = Color (avg [r | (Color r g b) <- colors])
+                    (avg [g | (Color r g b) <- colors])
+                    (avg [b | (Color r g b) <- colors])
 
 ------------------------------------------------------------------------------
 

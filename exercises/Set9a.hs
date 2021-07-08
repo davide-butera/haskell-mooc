@@ -10,11 +10,11 @@
 
 module Set9a where
 
-import Data.Char
-import Data.List
-import Data.Ord
+import           Data.Char
+import           Data.List
+import           Data.Ord
 
-import Mooc.Todo
+import           Mooc.Todo
 
 ------------------------------------------------------------------------------
 -- Ex 1: Implement a function workload that takes in the number of
@@ -26,7 +26,10 @@ import Mooc.Todo
 -- Otherwise return "Ok."
 
 workload :: Int -> Int -> String
-workload nExercises hoursPerExercise = todo
+workload nExercises hoursPerExercise
+  | nExercises * hoursPerExercise > 100 = "Holy moly!"
+  | nExercises * hoursPerExercise < 10  = "Piece of cake!"
+  | otherwise                           = "Ok."
 
 ------------------------------------------------------------------------------
 -- Ex 2: Implement the function echo that builds a string like this:
@@ -39,7 +42,8 @@ workload nExercises hoursPerExercise = todo
 -- Hint: use recursion
 
 echo :: String -> String
-echo = todo
+echo ""     = ""
+echo (x:xs) = (x:xs) ++ ", " ++ echo xs
 
 ------------------------------------------------------------------------------
 -- Ex 3: A country issues some banknotes. The banknotes have a serial
@@ -52,7 +56,11 @@ echo = todo
 -- are valid.
 
 countValid :: [String] -> Int
-countValid = todo
+countValid notes = length $ filter (==True) $ map valid' notes
+
+valid' :: String -> Bool
+valid' note = note !! 2 == note !! 4 || -- third and fifth
+              note !! 3 == note !! 5    -- fourth and sixth
 
 ------------------------------------------------------------------------------
 -- Ex 4: Find the first element that repeats two or more times _in a
@@ -64,7 +72,10 @@ countValid = todo
 --   repeated [1,2,1,2,3,3] ==> Just 3
 
 repeated :: Eq a => [a] -> Maybe a
-repeated = todo
+repeated []       = Nothing
+repeated [_]      = Nothing
+repeated (x:y:xs) = if x==y then Just x
+                    else repeated (y:xs)
 
 ------------------------------------------------------------------------------
 -- Ex 5: A laboratory has been collecting measurements. Some of the
@@ -86,7 +97,10 @@ repeated = todo
 --     ==> Left "no data"
 
 sumSuccess :: [Either String Int] -> Either String Int
-sumSuccess = todo
+sumSuccess xs = if null ([x | Right x <- xs ])
+                then Left "no data"
+                else Right (sum [x | Right x <- xs ])
+
 
 ------------------------------------------------------------------------------
 -- Ex 6: A combination lock can either be open or closed. The lock
@@ -108,30 +122,39 @@ sumSuccess = todo
 --   isOpen (open "0000" (lock (changeCode "0000" (open "1234" aLock)))) ==> True
 --   isOpen (open "1234" (lock (changeCode "0000" (open "1234" aLock)))) ==> False
 
-data Lock = LockUndefined
+data Lock = Open String | Closed String
   deriving Show
 
 -- aLock should be a locked lock with the code "1234"
 aLock :: Lock
-aLock = todo
+aLock = Closed "1234"
 
 -- isOpen returns True if the lock is open
 isOpen :: Lock -> Bool
-isOpen = todo
+isOpen (Open _)   = True
+isOpen (Closed _) = False
+
 
 -- open tries to open the lock with the given code. If the code is
 -- wrong, nothing happens.
 open :: String -> Lock -> Lock
-open = todo
+open code (Closed lockCode) = if code == lockCode
+                              then Open lockCode
+                              else Closed lockCode
+open code (Open lockCode) = Open lockCode
 
 -- lock closes a lock. If the lock is already closed, nothing happens.
 lock :: Lock -> Lock
-lock = todo
+lock (Open lockCode)   = Closed lockCode
+lock (Closed lockCode) = Closed lockCode
+
 
 -- changeCode changes the code of an open lock. If the lock is closed,
 -- nothing happens.
 changeCode :: String -> Lock -> Lock
-changeCode = todo
+changeCode newcode (Open _)         = Open newcode
+changeCode newcode (Closed oldcode) = Closed oldcode
+
 
 ------------------------------------------------------------------------------
 -- Ex 7: Here's a type Text that just wraps a String. Implement an Eq
@@ -146,8 +169,12 @@ changeCode = todo
 --   Text "abc"  == Text "abcd"     ==> False
 --   Text "a bc" == Text "ab  d\n"  ==> False
 
-data Text = Text String
+newtype Text = Text String
   deriving Show
+
+instance Eq Text where
+  (==) (Text a) (Text b) = filter (not . Data.Char.isSpace) a ==
+                           filter (not . Data.Char.isSpace) b
 
 
 ------------------------------------------------------------------------------
