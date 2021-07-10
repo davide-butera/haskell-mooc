@@ -1,8 +1,8 @@
 module Set9b where
 
-import Mooc.Todo
+import           Mooc.Todo
 
-import Data.List
+import           Data.List
 
 --------------------------------------------------------------------------------
 -- Ex 1: In this exercise set, we'll solve the N Queens problem step by step.
@@ -47,10 +47,10 @@ type Col   = Int
 type Coord = (Row, Col)
 
 nextRow :: Coord -> Coord
-nextRow (i,j) = todo
+nextRow (i,j) = (i+1, 1)
 
 nextCol :: Coord -> Coord
-nextCol (i,j) = todo
+nextCol (i,j) = (i, j+1)
 
 --------------------------------------------------------------------------------
 -- Ex 2: Implement the function prettyPrint that, given the size of
@@ -100,7 +100,10 @@ nextCol (i,j) = todo
 -- takes O(n^3) time. Just ignore the previous sentence, if you're not familiar
 -- with the O-notation.)
 prettyPrint :: Size -> [Coord] -> String
-prettyPrint = todo
+prettyPrint n []     = []
+prettyPrint n coords = concat [[ if (i,j) `elem` coords then 'Q' else '.' | j <- [1..n]]
+                                ++['\n'] | i <- [1..n]]
+
 
 --------------------------------------------------------------------------------
 -- Ex 3: The task in this exercise is to define the relations sameRow, sameCol,
@@ -124,16 +127,16 @@ prettyPrint = todo
 --   sameAntidiag (500,5) (5,500) ==> True
 
 sameRow :: Coord -> Coord -> Bool
-sameRow (i,j) (k,l) = todo
+sameRow (i,j) (k,l) = i==k
 
 sameCol :: Coord -> Coord -> Bool
-sameCol (i,j) (k,l) = todo
+sameCol (i,j) (k,l) = j==l
 
 sameDiag :: Coord -> Coord -> Bool
-sameDiag (i,j) (k,l) = todo
+sameDiag (i,j) (k,l) = i-j == k-l
 
 sameAntidiag :: Coord -> Coord -> Bool
-sameAntidiag (i,j) (k,l) = todo
+sameAntidiag (i,j) (k,l) = i+j == k+l
 
 --------------------------------------------------------------------------------
 -- Ex 4: In chess, a queen may capture another piece in the same row, column,
@@ -189,7 +192,15 @@ type Candidate = Coord
 type Stack     = [Coord]
 
 danger :: Candidate -> Stack -> Bool
-danger = todo
+-- danger x [] = False
+-- danger x (queen:queens) = danger' x queen ||  danger x queens
+danger x = any (danger' x)
+
+danger' :: Candidate -> Coord -> Bool
+danger' x queen = sameRow x queen  ||
+                  sameCol x queen  ||
+                  sameDiag x queen ||
+                  sameAntidiag x queen
 
 --------------------------------------------------------------------------------
 -- Ex 5: In this exercise, the task is to write a modified version of
@@ -224,7 +235,12 @@ danger = todo
 -- solution to this version. Any working solution is okay in this exercise.)
 
 prettyPrint2 :: Size -> Stack -> String
-prettyPrint2 = todo
+prettyPrint2 n []     = []
+prettyPrint2 n queens = concat [[ if (i,j) `elem` queens then 'Q'
+                                  else if danger (i,j) queens then '#'
+                                  else '.'
+                                  | j <- [1..n]] ++['\n']
+                                  | i <- [1..n]]
 
 --------------------------------------------------------------------------------
 -- Ex 6: Now that we can check if a piece can be safely placed into a square in
@@ -265,7 +281,11 @@ prettyPrint2 = todo
 --     Q#######
 
 fixFirst :: Size -> Stack -> Maybe Stack
-fixFirst n s = todo
+fixFirst n [] = Nothing
+fixFirst n ((i,j):rest)
+    | danger (i,j) rest = if (j+1) > n then Nothing
+                          else fixFirst n ((i,j+1):rest)
+    | otherwise = Just ((i,j):rest)
 
 --------------------------------------------------------------------------------
 -- Ex 7: We need two helper functions for stack management.
