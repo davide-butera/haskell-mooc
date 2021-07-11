@@ -3,3 +3,4 @@
 .stack-work
 score.json
 exercises/*.png
+exercises/.vscode

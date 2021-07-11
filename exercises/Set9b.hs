@@ -3,7 +3,7 @@ module Set9b where
 import           Mooc.Todo
 
 import           Data.List
-
+import           Data.Maybe
 --------------------------------------------------------------------------------
 -- Ex 1: In this exercise set, we'll solve the N Queens problem step by step.
 -- N Queens is a generalisation of the Eight Queens problem described in
@@ -192,8 +192,8 @@ type Candidate = Coord
 type Stack     = [Coord]
 
 danger :: Candidate -> Stack -> Bool
--- danger x [] = False
--- danger x (queen:queens) = danger' x queen ||  danger x queens
+--danger x []             = False
+--danger x (queen:queens) = danger' x queen ||  danger x queens
 danger x = any (danger' x)
 
 danger' :: Candidate -> Coord -> Bool
@@ -283,6 +283,7 @@ prettyPrint2 n queens = concat [[ if (i,j) `elem` queens then 'Q'
 fixFirst :: Size -> Stack -> Maybe Stack
 fixFirst n [] = Nothing
 fixFirst n ((i,j):rest)
+    | i>n || j>n = Nothing
     | danger (i,j) rest = if (j+1) > n then Nothing
                           else fixFirst n ((i,j+1):rest)
     | otherwise = Just ((i,j):rest)
@@ -307,10 +308,12 @@ fixFirst n ((i,j):rest)
 -- Hint: Remember nextRow and nextCol? Use them!
 
 continue :: Stack -> Stack
-continue s = todo
+continue (x:xs) = nextRow x:x:xs
+continue _      = []
 
 backtrack :: Stack -> Stack
-backtrack s = todo
+backtrack (x:y:xs) = nextCol y:xs
+backtrack _        = []
 
 --------------------------------------------------------------------------------
 -- Ex 8: Let's take a step. Our algorithm solves the problem (in a
@@ -379,7 +382,9 @@ backtrack s = todo
 --     step 8 [(6,1),(5,4),(4,2),(3,5),(2,3),(1,1)] ==> [(5,5),(4,2),(3,5),(2,3),(1,1)]
 
 step :: Size -> Stack -> Stack
-step = todo
+step n queens = case fixFirst n queens of
+  Nothing -> backtrack queens
+  Just x  -> continue x
 
 --------------------------------------------------------------------------------
 -- Ex 9: Let's solve our puzzle! The function finish takes a partial
@@ -394,7 +399,13 @@ step = todo
 -- solve the n queens problem.
 
 finish :: Size -> Stack -> Stack
-finish = todo
+finish n queens
+    | length (step n queens) > n = fromMaybe [] (fixFirst n queens)
+    | otherwise = finish n (step n queens)
+
+-- | length (step n queens) > n = case fixFirst n queens of
+-- Nothing -> []
+-- Just x  -> x
 
 solve :: Size -> Stack
 solve n = finish n [(1,1)]
