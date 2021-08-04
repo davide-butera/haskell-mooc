@@ -36,9 +36,9 @@ False     ||| False = False
 --   length [False,undefined] ==> 2
 
 boolLength :: [Bool] -> Int
-boolLength []     = 0
-boolLength (x:xs) = if x then 1 + boolLength xs else 1 + boolLength xs
-
+boolLength []         = 0
+boolLength (True:xs)  = 1 + boolLength xs
+boolLength (False:xs) = 1 + boolLength xs
 
 ------------------------------------------------------------------------------
 -- Ex 3: Define the function validate which, given a predicate and a
