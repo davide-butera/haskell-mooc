@@ -74,13 +74,20 @@ readWords n = do strings <- replicateM n getLine
 --   ["bananas","garlic","pakchoi"]
 
 readUntil :: (String -> Bool) -> IO [String]
-readUntil f = readUntil' f []
+readUntil f = do word <- getLine
+                 if f word
+                   then return []
+                   else do words <- readUntil f
+                           return $ word:words
 
-readUntil' :: (String -> Bool) -> [String] -> IO [String]
-readUntil' f lines = do line <- getLine
-                        if f line
-                            then return lines
-                            else readUntil' f (lines ++ [line])
+-- readUntil :: (String -> Bool) -> IO [String]
+-- readUntil f = readUntil' f []
+
+-- readUntil' :: (String -> Bool) -> [String] -> IO [String]
+-- readUntil' f lines = do line <- getLine
+--                         if f line
+--                             then return lines
+--                             else readUntil' f (lines ++ [line])
 
 ------------------------------------------------------------------------------
 -- Ex 6: given n, print the numbers from n to 0, one per line
