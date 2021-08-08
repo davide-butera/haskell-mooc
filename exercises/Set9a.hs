@@ -7,7 +7,6 @@
 -- You can also play around with your answers in GHCi with
 --
 --   stack ghci Set9a.hs
-
 module Set9a where
 
 import           Data.Char
@@ -252,8 +251,17 @@ compose (x:xs) ys = case lookup (snd x) ys of
 type Permutation = [(Int,Int)]
 
 permute :: Permutation -> [a] -> [a]
-permute [] a              = a
-permute ((from,to):xs) ys = permute xs (take to ys ++ [ys!!from] ++ drop (to+1) ys)
+permute permutations = permute' $ sortBy (comparing snd) permutations
 
-updateElement :: Int -> Int -> [a] -> [a]
-updateElement from to list = take to list ++ [list!!from] ++ drop (to+1) list
+permute' :: Permutation -> [a] -> [a]
+permute' []              list = []
+permute' ((from, to):xs) list = (list!!from) : permute xs list
+
+-- permute permutations [] = []
+-- permute permutations (x:xs) = go permutations (x:xs) (replicate (length (x:xs)) x)
+--   where
+--       go [] list acc              = acc
+--       go ((from, to):xs) list acc = go xs list (replaceAtIndex to (list!!from) acc)
+
+-- replaceAtIndex i x xs = take i xs ++ [x] ++ drop (i+1) xs
+
