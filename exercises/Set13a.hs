@@ -87,7 +87,13 @@ checkCapitals (for,sur) = if all isUpper [head for, head sur]
 --     ==> Just "a"
 
 winner :: [(String,Int)] -> String -> String -> Maybe String
-winner scores player1 player2 = todo
+winner scores player1 player2 = do
+  score1 <- lookup player1 scores
+  score2 <- lookup player2 scores
+  case compare score1 score2 of
+    LT -> pure player2
+    EQ -> pure player1
+    GT -> pure player1
 
 ------------------------------------------------------------------------------
 -- Ex 3: given a list of indices and a list of values, return the sum
@@ -105,8 +111,13 @@ winner scores player1 player2 = todo
 --    Nothing
 
 selectSum :: Num a => [a] -> [Int] -> Maybe a
-selectSum xs is = todo
-
+selectSum xs is = sum <$> sequence ([safeIndex xs x | x <- is])
+                 --  fmap sum $
+safeIndex :: [a] -> Int -> Maybe a
+safeIndex xs idx
+  | idx < 0          = Nothing
+  | idx >= length xs = Nothing
+  | otherwise        = Just (xs !! idx)
 ------------------------------------------------------------------------------
 -- Ex 4: Here is the Logger monad from the course material. Implement
 -- the operation countAndLog which produces the number of elements
@@ -139,7 +150,8 @@ instance Applicative Logger where
   (<*>) = ap
 
 countAndLog :: Show a => (a -> Bool) -> [a] -> Logger Int
-countAndLog = todo
+countAndLog f xs = Logger (map show xs') (length xs')
+                   where xs' = filter f xs
 
 ------------------------------------------------------------------------------
 -- Ex 5: You can find the Bank and BankOp code from the course
@@ -153,10 +165,16 @@ countAndLog = todo
 -- from Data.Map are available under the prefix Map.
 
 exampleBank :: Bank
-exampleBank = (Bank (Map.fromList [("harry",10),("cedric",7),("ginny",1)]))
+exampleBank = Bank (Map.fromList [("harry",10),("cedric",7),("ginny",1)])
 
 balance :: String -> BankOp Int
-balance accountName = todo
+balance accountName = BankOp (lookup' accountName)
+
+lookup' :: String -> Bank -> (Int,Bank)
+lookup' accountName (Bank bank) = (res, Bank bank)
+  where res = case Map.lookup accountName bank of
+                Nothing -> 0
+                Just n  -> n
 
 ------------------------------------------------------------------------------
 -- Ex 6: Using the operations balance, withdrawOp and depositOp, and
