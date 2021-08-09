@@ -1,14 +1,14 @@
 module Set13a where
 
-import Mooc.Todo
+import           Mooc.Todo
 
-import Control.Monad
-import Control.Monad.Trans.State
-import Data.Char
-import Data.List
-import qualified Data.Map as Map
+import           Control.Monad
+import           Control.Monad.Trans.State
+import           Data.Char
+import           Data.List
+import qualified Data.Map                  as Map
 
-import Examples.Bank
+import           Examples.Bank
 
 
 ------------------------------------------------------------------------------
@@ -45,19 +45,22 @@ readNames s =
 -- (NB! There are obviously other corner cases like the inputs " " and
 -- "a b c", but you don't need to worry about those here)
 split :: String -> Maybe (String,String)
-split = todo
+split s = if ' ' `elem` s then
+              Just (takeWhile (/=' ') s, tail $ dropWhile (/=' ') s)
+            else Nothing
 
 -- checkNumber should take a pair of two strings and return them
 -- unchanged if they don't contain numbers. Otherwise Nothing is
 -- returned.
 checkNumber :: (String, String) -> Maybe (String, String)
-checkNumber = todo
+checkNumber (a,b) = if not $ any isDigit (a++b) then Just (a,b) else Nothing
 
 -- checkCapitals should take a pair of two strings and return them
 -- unchanged if both start with a capital letter. Otherwise Nothing is
 -- returned.
 checkCapitals :: (String, String) -> Maybe (String, String)
-checkCapitals (for,sur) = todo
+checkCapitals (for,sur) = if all isUpper [head for, head sur]
+                            then Just (for,sur) else Nothing
 
 ------------------------------------------------------------------------------
 -- Ex 2: Given a list of players and their scores (as [(String,Int)]),
