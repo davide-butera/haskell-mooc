@@ -45,9 +45,13 @@ readNames s =
 -- (NB! There are obviously other corner cases like the inputs " " and
 -- "a b c", but you don't need to worry about those here)
 split :: String -> Maybe (String,String)
-split s = if ' ' `elem` s then
-              Just (takeWhile (/=' ') s, tail $ dropWhile (/=' ') s)
-            else Nothing
+split s = case break (== ' ') s of
+               (a,' ':b) -> Just (a,b)
+               _         -> Nothing
+
+-- split s = if ' ' `elem` s then
+--               Just (takeWhile (/=' ') s, tail $ dropWhile (/=' ') s)
+--             else Nothing
 
 -- checkNumber should take a pair of two strings and return them
 -- unchanged if they don't contain numbers. Otherwise Nothing is
@@ -272,9 +276,15 @@ parensMatch s = count == 0
 -- PS. The order of the list of pairs doesn't matter
 
 count :: (Eq a, Ord a) => a -> State [(a,Int)] ()
-count x = do old <- get
-             let oldlist = Map.fromList old
-             put $ Map.toList $ Map.insertWith (+) x 1 oldlist
+count x = modify (inc x)
+  where inc x [] = [(x,1)]
+        inc x ((y,k):ys)
+          | x == y    = (y,k+1):ys
+          | otherwise = (y,k):inc x ys
+
+-- count x = do old <- get
+--              let oldlist = Map.fromList old
+--              put $ Map.toList $ Map.insertWith (+) x 1 oldlist
 
 ------------------------------------------------------------------------------
 -- Ex 10: Implement the operation occurrences, which
