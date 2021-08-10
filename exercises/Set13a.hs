@@ -192,7 +192,7 @@ lookup' accountName (Bank bank) = (res, Bank bank)
 --     ==> ((),Bank (fromList [("cedric",7),("ginny",1),("harry",10)]))
 
 rob :: String -> String -> BankOp ()
-rob from to = todo
+rob from to = balance from +> withdrawOp from +> depositOp to
 
 ------------------------------------------------------------------------------
 -- Ex 7: using the State monad, write the operation `update` that first
@@ -204,7 +204,8 @@ rob from to = todo
 --    ==> ((),7)
 
 update :: State Int ()
-update = todo
+update = do old <- get
+            put (old * 2 + 1)
 
 ------------------------------------------------------------------------------
 -- Ex 8: Checking that parentheses are balanced with the State monad.
@@ -232,7 +233,15 @@ update = todo
 --   parensMatch "(()))("      ==> False
 
 paren :: Char -> State Int ()
-paren = todo
+paren c = do old <- get
+             case old of
+               (-1) -> put (-1)
+               _ -> (
+                  case c of
+                    '(' -> put (old+1)
+                    ')' -> put (old-1)
+                    _   -> put old
+                  )
 
 parensMatch :: String -> Bool
 parensMatch s = count == 0
@@ -262,8 +271,10 @@ parensMatch s = count == 0
 --
 -- PS. The order of the list of pairs doesn't matter
 
-count :: Eq a => a -> State [(a,Int)] ()
-count x = todo
+count :: (Eq a, Ord a) => a -> State [(a,Int)] ()
+count x = do old <- get
+             let oldlist = Map.fromList old
+             put $ Map.toList $ Map.insertWith (+) x 1 oldlist
 
 ------------------------------------------------------------------------------
 -- Ex 10: Implement the operation occurrences, which
@@ -284,5 +295,9 @@ count x = todo
 --  runState (occurrences [4,7]) [(2,1),(3,1)]
 --    ==> (4,[(2,1),(3,1),(4,1),(7,1)])
 
-occurrences :: (Eq a) => [a] -> State [(a,Int)] Int
-occurrences xs = todo
+occurrences :: (Eq a, Ord a) => [a] -> State [(a,Int)] Int
+occurrences xs = mapM_ count xs >> length <$> get
+
+-- do mapM_ count xs
+-- new <- get
+-- return (length new)
