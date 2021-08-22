@@ -10,6 +10,7 @@ import qualified Data.ByteString      as B
 import qualified Data.ByteString.Lazy as BL
 import           Data.Char
 import           Data.Int
+import           Data.List
 import qualified Data.Text            as T
 import           Data.Text.Encoding
 import qualified Data.Text.Lazy       as TL
@@ -56,7 +57,9 @@ fmapToEverySecond f = zipWith ($) (cycle [f, id])
 --   longestRepeat (T.pack "aabbbbccc") ==> 4
 
 longestRepeat :: T.Text -> Int
-longestRepeat = todo
+longestRepeat t = case T.length t of
+                  0 -> 0
+                  _ -> T.length . last . sortOn T.length . T.group $ t
 
 ------------------------------------------------------------------------------
 -- Ex 4: Given a lazy (potentially infinite) Text, extract the first n
@@ -81,7 +84,10 @@ takeStrict n x = TL.toStrict $ TL.take n x
 --   byteRange (B.pack [3]) ==> 0
 
 byteRange :: B.ByteString -> Word8
-byteRange = todo
+byteRange b = case B.length b of
+                  0 -> 0
+                  _ -> B.last sorted  - B.head sorted
+              where sorted = B.sort b
 
 ------------------------------------------------------------------------------
 -- Ex 6: Compute the XOR checksum of a ByteString. The XOR checksum of
@@ -102,7 +108,7 @@ byteRange = todo
 --   xorChecksum (B.pack []) ==> 0
 
 xorChecksum :: B.ByteString -> Word8
-xorChecksum = todo
+xorChecksum a = foldl Data.Bits.xor 0 $ B.unpack a
 
 ------------------------------------------------------------------------------
 -- Ex 7: Given a ByteString, compute how many UTF-8 characters it
@@ -119,7 +125,9 @@ xorChecksum = todo
 --   countUtf8Chars (B.drop 1 (encodeUtf8 (T.pack "åäö"))) ==> Nothing
 
 countUtf8Chars :: B.ByteString -> Maybe Int
-countUtf8Chars = todo
+countUtf8Chars s = case decodeUtf8' s of
+  Left ue   -> Nothing
+  Right txt -> Just (T.length txt)
 
 ------------------------------------------------------------------------------
 -- Ex 8: Given a (nonempty) strict ByteString b, generate an infinite
@@ -131,5 +139,4 @@ countUtf8Chars = todo
 --     ==> [0,1,2,2,1,0,0,1,2,2,1,0,0,1,2,2,1,0,0,1]
 
 pingpong :: B.ByteString -> BL.ByteString
-pingpong = todo
-
+pingpong b = BL.cycle . BL.fromStrict  $ B.concat [b, B.reverse b]
