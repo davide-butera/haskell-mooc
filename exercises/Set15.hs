@@ -1,11 +1,11 @@
 module Set15 where
 
-import Mooc.Todo
-import Examples.Validation
+import           Examples.Validation
+import           Mooc.Todo
 
-import Control.Applicative
-import Data.Char
-import Text.Read (readMaybe)
+import           Control.Applicative
+import           Data.Char
+import           Text.Read           (readMaybe)
 
 ------------------------------------------------------------------------------
 -- Ex 1: Sum two Maybe Int values using Applicative operations (i.e.
@@ -17,7 +17,7 @@ import Text.Read (readMaybe)
 --  sumTwoMaybes Nothing Nothing    ==> Nothing
 
 sumTwoMaybes :: Maybe Int -> Maybe Int -> Maybe Int
-sumTwoMaybes = todo
+sumTwoMaybes = liftA2 (+)
 
 ------------------------------------------------------------------------------
 -- Ex 2: Given two lists of words, xs and ys, generate all statements
@@ -36,7 +36,8 @@ sumTwoMaybes = todo
 --         "code is not suffering","code is not life"]
 
 statements :: [String] -> [String] -> [String]
-statements = todo
+statements x y = concat $ liftA2 combine x y
+  where combine x y = [x ++ " is " ++ y, x ++ " is not " ++ y]
 
 ------------------------------------------------------------------------------
 -- Ex 3: A simple calculator with error handling. Given an operation
@@ -54,7 +55,10 @@ statements = todo
 --  calculator "double" "7x"  ==> Nothing
 
 calculator :: String -> String -> Maybe Int
-calculator = todo
+calculator x y = case x of
+                 "negate" -> negate <$> readMaybe y
+                 "double" -> (2*)   <$> readMaybe y
+                 _        -> Nothing
 
 ------------------------------------------------------------------------------
 -- Ex 4: Safe division. Implement the function validateDiv that
@@ -71,7 +75,8 @@ calculator = todo
 --  validateDiv 0 3 ==> Ok 0
 
 validateDiv :: Int -> Int -> Validation Int
-validateDiv = todo
+validateDiv x y = fmap (div x) checkedy -- liftA2 div (pure x) checkedy
+  where checkedy = check (y/=0) "Division by zero!" y
 
 ------------------------------------------------------------------------------
 -- Ex 5: Validating street addresses. A street address consists of a
@@ -101,7 +106,13 @@ data Address = Address String String String
   deriving (Show,Eq)
 
 validateAddress :: String -> String -> String -> Validation Address
-validateAddress streetName streetNumber postCode = todo
+validateAddress streetName streetNumber postCode =
+    Address <$> validateStreetName <*>  validateStreetNumber <*>  validatePostCode
+
+  where validateStreetName   = check (length streetName <= 20) "Invalid street name" streetName
+        validateStreetNumber = check (all isDigit streetNumber) "Invalid street number" streetNumber
+        validatePostCode     = check (all isDigit postCode && length postCode == 5)
+            "Invalid postcode" postCode
 
 ------------------------------------------------------------------------------
 -- Ex 6: Given the names, ages and employment statuses of two
