@@ -3,17 +3,17 @@ module Set14a where
 -- Remember to browse the docs of the Data.Text and Data.ByteString
 -- libraries while working on the exercises!
 
-import Mooc.Todo
+import           Mooc.Todo
 
-import Data.Bits
-import Data.Char
-import Data.Text.Encoding
-import Data.Word
-import Data.Int
-import qualified Data.Text as T
-import qualified Data.Text.Lazy as TL
-import qualified Data.ByteString as B
+import           Data.Bits
+import qualified Data.ByteString      as B
 import qualified Data.ByteString.Lazy as BL
+import           Data.Char
+import           Data.Int
+import qualified Data.Text            as T
+import           Data.Text.Encoding
+import qualified Data.Text.Lazy       as TL
+import           Data.Word
 
 ------------------------------------------------------------------------------
 -- Ex 1: Greet a person. Given the name of a person as a Text, return
@@ -28,7 +28,9 @@ import qualified Data.ByteString.Lazy as BL
 --  greetText (T.pack "Benedict Cumberbatch") ==> "Hello, Benedict Cumber...!"
 
 greetText :: T.Text -> T.Text
-greetText = todo
+greetText x = if T.length x > 15 then
+                    T.pack "Hello, " <> T.take 15 x <> T.pack "...!"
+              else  T.pack "Hello, " <> x <> T.pack "!"
 
 ------------------------------------------------------------------------------
 -- Ex 2: Capitalize every second word of a Text.
@@ -40,7 +42,10 @@ greetText = todo
 --     ==> "WORD"
 
 shout :: T.Text -> T.Text
-shout = todo
+shout x = T.unwords $ fmapToEverySecond T.toUpper (T.words x)
+
+fmapToEverySecond :: (T.Text -> T.Text) -> [T.Text] -> [T.Text]
+fmapToEverySecond f = zipWith ($) (cycle [f, id])
 
 ------------------------------------------------------------------------------
 -- Ex 3: Find the longest sequence of a single character repeating in
@@ -64,7 +69,7 @@ longestRepeat = todo
 --   takeStrict 15 (TL.pack (cycle "asdf"))  ==>  "asdfasdfasdfasd"
 
 takeStrict :: Int64 -> TL.Text -> T.Text
-takeStrict = todo
+takeStrict n x = TL.toStrict $ TL.take n x
 
 ------------------------------------------------------------------------------
 -- Ex 5: Find the difference between the largest and smallest byte
