@@ -5,3 +5,4 @@ score.json
 exercises/*.png
 exercises/.vscode
 dist-newstyle
+exercises/bank.db
