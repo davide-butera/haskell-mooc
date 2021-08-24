@@ -215,7 +215,7 @@ data Expression = Plus Arg Arg | Minus Arg Arg
 
 instance Arbitrary Arg where
   arbitrary = oneof [genNumber, genVariable]
-    where genNumber   = Number   <$> choose (1,10)
+    where genNumber   = Number   <$> choose (1, 10)
           genVariable = Variable <$> elements "abcxyz"
 
 instance Arbitrary Expression where
